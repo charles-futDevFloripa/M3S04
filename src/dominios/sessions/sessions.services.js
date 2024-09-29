@@ -1,5 +1,5 @@
 const usuarioModel = require('../../database/models/usuarios');
-const { compare } = require('bcrypt');
+const { compare } = require('bcryptjs');
 const { sign } = require('jsonwebtoken');
 require('dotenv').config();
 

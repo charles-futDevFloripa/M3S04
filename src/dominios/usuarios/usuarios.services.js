@@ -1,53 +1,60 @@
-const usuarioModel = require('../../database/models/usuarios')
-const { hash } = require('bcrypt')
+const usuarioModel = require('../../database/models/usuarios');
+const { hash } = require('bcryptjs');
 
 class UsuariosServices {
-    async list() {
-        const usuarios = await usuarioModel.findAll({
-            attributes: ['id', 'nome', 'sobrenome', 'email', 'createdAt', 'updatedAt']
-        })
+  async list() {
+    const usuarios = await usuarioModel.findAll({
+      attributes: [
+        'id',
+        'nome',
+        'sobrenome',
+        'email',
+        'createdAt',
+        'updatedAt',
+      ],
+    });
 
-        return usuarios
+    return usuarios;
+  }
+
+  async createUser({ email, nome, sobrenome, senha, permissao }) {
+    const usuarioExiste = await usuarioModel.findOne({
+      where: {
+        email,
+      },
+    });
+
+    if (usuarioExiste) {
+      //throw new Error("Erro no servidor")
+      return null;
     }
 
-    async createUser({ email, nome, sobrenome, senha, permissao }) {
-        const usuarioExiste = await usuarioModel.findOne({
-            where: {
-                email,
-            }
-        })
+    const senhaCriptografada = await hash(senha, 8);
 
-        if(usuarioExiste) {
-            //throw new Error("Erro no servidor")
-            return null
-        }
+    const usuario = await usuarioModel.create({
+      email,
+      nome,
+      sobrenome,
+      senha: senhaCriptografada,
+      permissao,
+    });
 
-        const senhaCriptografada = await hash(senha, 8)
+    return usuario;
+  }
 
-        const usuario = await usuarioModel.create({
-            email, 
-            nome, 
-            sobrenome, 
-            senha: senhaCriptografada,
-            permissao,
-        })
+  update() {}
 
-        return usuario
+  async delete(id) {
+    const usuarioExiste = await usuarioModel.findByPk(id);
+
+    if (!usuarioExiste) {
+      return false;
     }
-    
-    update() {}
 
-    async delete(id) {
-        const usuarioExiste = await usuarioModel.findByPk(id)
+    await usuarioExiste.destroy();
 
-        if(!usuarioExiste) {
-            return false
-        }
-
-        await usuarioExiste.destroy()
-
-        return true
-    }
+    return true;
+  }
 }
 
-module.exports = UsuariosServices
+module.exports = UsuariosServices;
