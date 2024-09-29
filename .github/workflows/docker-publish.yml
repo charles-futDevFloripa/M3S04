@@ -1,0 +1,33 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout do código
+      - name: Check out the repository
+        uses: actions/checkout@v3
+
+      # Configurar o Docker para autenticar no Docker Hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      # Construir a imagem Docker
+      - name: Build the Docker image
+        run: docker build . -t ${{ secrets.DOCKER_HUB_USERNAME }}/testesdocker:latest
+
+      # Fazer o push da imagem para o Docker Hub
+      - name: Push the Docker image
+        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/testesdocker:latest
